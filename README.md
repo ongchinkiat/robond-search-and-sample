@@ -397,6 +397,15 @@ Video URL: https://youtu.be/MiPmyRX1FZU
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=MiPmyRX1FZU" target="_blank"><img src="http://img.youtube.com/vi/MiPmyRX1FZU/0.jpg"
 alt="Rover Simulation" width="240" height="180" border="1" /></a>
 
+
+There are other simulation runs captured that illustrate interesting situations, e.g.
+1. Rover confused by 2 rocks in the same view
+2. Picked up 6 rocks, but the simulator lags so much that the rover keep spinning round and round when trying to target home
+3. Rock was embedded too deep into the wall, rover moved keeping to the side of wall but still didn't trigger the "near_sample" signal and moved pass the rock
+
+I may upload these to youtube if I can find time.
+
+
 ### Parameters consideration
 
 The current parameters are designed to enhance the chance of completing a full  run of picking all 6 rocks and map close to 100%. The trade off is that the
