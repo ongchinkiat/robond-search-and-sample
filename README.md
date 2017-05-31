@@ -414,3 +414,26 @@ rover will hit the walls a lot and get stuck a lot. In some runs, the rover will
 It is possible to increase the obstacle detection thresholds so that the rover runs much more smoothly, but the tight areas in the map will not get visited, and if a rock is there, it will not be detected.
 
 When the simulator lags, the rover may missing turning targets, and it will turn for several rounds. It may also not detecing rocks when passing by. The unstuck strategies also goes out of control when the camera feeds are missing frames during lag. It is possible to counter this by making the rover moves and turn slower. But doing that will make the simulation runs longer, and the lag gets worst as time goes by. My preference was to move faster and hope for the best.
+
+### Supporting Function enhancements
+
+I added some codes in supporting_functions.py to make the rock sample locations marked out as yellow blinking dots, and also mark the current rover location as a white dot. This makes watching the simulation runs more fun. This doesn't change the functionality and statistics.
+
+```
+# plot out all rock sample location in yellow blicking
+time_blink = int(Rover.total_time) % 3
+rock_size = 1
+map_add[int(Rover.pos[1])-rock_size:int(Rover.pos[1])+rock_size,
+              int(Rover.pos[0])-rock_size:int(Rover.pos[0])+rock_size, :2] = 255
+if (time_blink == 0):
+    for idx in range(len(Rover.samples_pos[0]) ):
+      test_rock_x = Rover.samples_pos[0][idx]
+      test_rock_y = Rover.samples_pos[1][idx]
+      map_add[test_rock_y-rock_size:test_rock_y+rock_size,
+              test_rock_x-rock_size:test_rock_x+rock_size, :2] = 255
+```
+
+Add them before this line:
+```
+# Flip the map for plotting so that the y-axis points upward in the display
+```
