@@ -1,14 +1,14 @@
-### Udacity Robotics Nanodegree Project 1
+## Udacity Robotics Nanodegree Project 1
 
 # Search and Sample Return
 
-### Rover Project Test Notebook
+## Rover Project Test Notebook
 
 1. Notebook File: /code/Rover_Project_Test_Notebook.ipynb
 2. HTML: /Rover_Project_Test_Notebook.html
 3. Output Video: /test_mapping.mp4
 
-##### Notebook Analysis 1: add obstacle and rock sample identification
+### Notebook Analysis 1: add obstacle and rock sample identification
 
 For navigable path identification, first do a Prespect Transform to get the warped image. Then apply color threshold for "R,G,B > 160" to get the color selected warped image. In colorsel, navigable path have 1 value and obstacles have 0 value.
 
@@ -57,7 +57,7 @@ Then we do the Prespect Transform to get rock_warped. And lastly, transform the 
                                 data.worldmap.shape[0], scale)
 ```
 
-##### Notebook Analysis 2: process_image() function
+### Notebook Analysis 2: process_image() function
 
 In each step of process_image(), we get the current Rover position and yaw from  data.xpos[], data.ypos[], data.yaw[].
 
@@ -85,7 +85,7 @@ Top left is the camera view, top right is the prespect view. Bottom left is the 
 
 Yellow dots is the detected rock. It looks like the rock distance and direction calculated is not accurate. Thus in my simulator code, I constantly re-detect the rock location as the rover goes nearer to the rock.
 
-##### Extra helper functions
+### Extra helper functions
 
 I also tested out some helper functions using the Notebook.
 
@@ -93,7 +93,7 @@ I also tested out some helper functions using the Notebook.
 
 2. diff_angle(): Given 2 angles in degrees, calculate the absolute difference between the 2 angles. Make sure the result is between 0 to 179 degrees.
 
-##### Identifying obstacle immediately infront: plot_obs()
+### Identifying obstacle immediately infront: plot_obs()
 
 One problem with just using the whole perspect transformed image to navigate is: when there is a rock right in the center, and the sides are clear, our rover will think that it is still good to go forward.
 
@@ -103,7 +103,7 @@ Note: the obs-in-front.jpg, small-rock-in-front.jpg, looks-ok-but-stuck.jpg are 
 
 
 
-### Autonomous Navigation and Mapping
+## Autonomous Navigation and Mapping
 
 In this part of the project, we are given some starter and supporting codes for the autonomous navigator, and a Unity Engine based rover simulator for the  navigator to control.
 
@@ -115,13 +115,20 @@ Files:
 3. Decision Engine: /code/decision.py
 4. Supporting Functions: /code/supporting_functions.py
 
-##### Perception Engine: perception_step() function
+### Perception Engine: perception_step() function
 
 For the perception_step() function, the same 3 identification code blocks as above, for navigable path, obstacles, rocks are applied, together with the necessary supporting functions. I also added the Extra helper functions and "Identifying obstacle immediately infront" function codes.
 
 I fine tuned the rock identification to color threshold "R,G > 140, B < 110", for better performance.
 
-###### Starting point
+### Special Case: 2 Rock Nearby
+
+For some cases where 2 rocks are near to each other, the camera view may contain 2 rocks. This will cause the rock detection angle to point at the middle between the 2 rocks.
+
+To avoid runnning the rover through the middle and missing both rocks, we detect this by checking the Standard Deviation of the rock pixels. If the Standard Deviation is greater than a threshold, we remove all pixels to the left of the Mean Y-axis value. This will remove the left rock and the rover can go towards the right rock.
+
+
+### Starting point
 
 The starting point of the Rover is recorded in Rover.start_pos. This is needed so that we know where to go after we pick up all the rocks.
 ```
@@ -130,7 +137,7 @@ if (Rover.start_pos is None):
     Rover.start_pos = (rover_xpos, rover_ypos)
 ```
 
-###### Obstacle In Front
+### Obstacle In Front
 
 For the obstacle in front detection, there are 3 Rover states to update:
 1. Rover.rock_in_front
@@ -161,7 +168,7 @@ if (Rover.rock_in_front_right == 1) and (Rover.rock_in_front_left == 1):
 
 The decision engine will look at these states to decide whether to stop the rover, and which direction to turn to avoid the obstacle. On hindsight, I shouldn't have name them "rock_in_front", it may cause confusion with the Yellow Rock targets we are supposed to pick up.
 
-###### Mapping
+### Mapping
 
 For mapping, besides the Rover.worldmap and Rover.vision_image, I created 4 extra maps:
 1. Rover.navmap : for real positions that Rover has travelled
@@ -173,7 +180,7 @@ All 6 maps are updated in each run of the perception_step().
 
 To improve map accuracy, there is a Rover.acceptable_roll limit. If the current Rover roll or pitch is greater than Rover.acceptable_roll, we don't update the Rover.seenmap and Rover.obstaclemap.
 
-###### Navigation Decision
+### Navigation Decision
 
 To make the rover "more likely" to visit places that it haven't visited before, I use this simple strategy:
 1. Given the current navigable points (xpix, ypix) we get from the navigatable path detection
@@ -194,11 +201,11 @@ In some situations, e.g. getting unstuck or approching rocks, we still need the 
     Rover.cam_nav_dists, Rover.cam_nav_angles = to_polar_coords(xpix, ypix)
 ```
 
-##### Decision Engine: decision_step() function
+## Decision Engine: decision_step() function
 
 The decision_step() function reads the inputs set by perception_step(), and use them to control the rover.
 
-###### Global Mission Objective
+### Global Mission Objective
 
 The original Rover.mode is used to track the current action state of the rover. To track the higher level "mission state", we use a new state Rover.objective.
 
@@ -225,7 +232,7 @@ if (Rover.objective == 'go_home'):
     Rover.rock_pos = None
 ```
 
-###### Global Unstuck Strategy
+### Global Unstuck Strategy
 
 The first step of the decision tree is to detect whether the rover is stuck. There are many ways that the rover can be stuck. Sometimes, it goes into endless loop changing between 2 or more modes, which is difficult to detect. So we need this "global unstuck detection" to get the rover out of complex situations.
 
@@ -262,7 +269,7 @@ if (Rover.mode == 'forward') or (Rover.mode == 'forwardtorock') or (Rover.mode =
                     Rover.mode = 'unstuck'
 ```
 
-###### Forware Mode
+### Forware Mode
 
 This is the mode when the path is clear and we want the rover to move forward.
 
@@ -277,7 +284,7 @@ There are several situations where will trigger us to change mode:
 
 There is also a special branch for 'go_home' objective, to decide when to 'stop' and when to trigger 'turntohome' again.
 
-###### Stop Mode
+### Stop Mode
 
 In 'stop' mode, decisions were made base on these situations:
 1. **reached home** : brake and stay, set objective to "Reached Home!!"
@@ -286,7 +293,7 @@ In 'stop' mode, decisions were made base on these situations:
 4. **rover still moving** : brake and wait
 5. **rover stopped** : turn until enough navigable angles, then change mode to 'forward'
 
-###### Forward Awhile Mode
+### Forward Awhile Mode
 
 There are some situations where sometimes, just ignore every perception signals and just move forward for awhile can help to get out of a stuck sitation. This is why we have this 'Forward Awhile' Mode.
 
@@ -294,7 +301,7 @@ In 'forward_awhile' mode, decisions were made base on these situations:
 1. **when near a rock** : brake and change mode to 'trypick' (don't waste the chance to pick a rock)
 2. **normal** : move forward
 
-###### Back Awhile Mode
+### Back Awhile Mode
 
 There are some situations where sometimes, just ignore every perception signals and just move backwards for awhile can help to get out of a stuck sitation. This is why we have this 'Back Awhile' Mode.
 
@@ -302,7 +309,7 @@ In 'back_awhile' mode, decisions were made base on these situations:
 1. **when near a rock** : brake and change mode to 'trypick' (don't waste the chance to pick a rock)
 2. **normal** : move backwards
 
-###### Turn To Rock Mode
+### Turn To Rock Mode
 
 This is the first step when we detect a rock.
 
@@ -312,7 +319,7 @@ In 'turntorock' mode, decisions were made base on these situations:
 3. **rover facing rock** : change mode to 'forwardtorock'
 4. **Unstuck Triggered** : change mode to 'forward_awhile'
 
-###### Forward To Rock Mode
+### Forward To Rock Mode
 
 This is the second step when we detect a rock.
 
@@ -322,7 +329,7 @@ In 'forwardtorock' mode, decisions were made base on these situations:
 3. **Unstuck Triggered** : change mode to 'forward_awhile' or 'back_awhile'
 4. **normal** : maintain velocity between 0.4 to 0.8
 
-###### Try Pick Mode
+### Try Pick Mode
 
 This is the third step when we detect a rock.
 
@@ -331,7 +338,7 @@ In 'trypick' mode, decisions were made base on these situations:
 2. **when near a rock and stopped moving** : change mode to 'pickingup'
 3. **not near a rock anymore** : give up and change mode to 'forward'
 
-###### Picking Up Mode
+### Picking Up Mode
 
 This is the last step when we detect a rock.
 
@@ -339,7 +346,7 @@ In 'pickingup' mode, decisions were made base on these situations:
 1. **when rover state still in picking_up** : wait
 2. **when rover state exits picking_up** : change mode to 'forward'
 
-###### Unstuck Mode
+### Unstuck Mode
 
 In unstuck mode, we brake the rover, then steer the rover clockwise for a pre-determined angle.
 
@@ -348,7 +355,7 @@ In 'unstuck' mode, decisions were made base on these situations:
 2. **rover stationary** : turn rover clockwise
 3. **pre-determined yaw reached** : change mode to 'forward'
 
-###### Unstuck Anticlockwise Mode
+### Unstuck Anticlockwise Mode
 
 In unstuck anticlockwise mode, we brake the rover, then steer the rover anticlockwise for a pre-determined angle.
 
@@ -357,7 +364,7 @@ In 'unstuckanti' mode, decisions were made base on these situations:
 2. **rover stationary** : turn rover anticlockwise
 3. **pre-determined yaw reached** : change mode to 'forward'
 
-###### Turn To Home Mode
+### Turn To Home Mode
 
 The 'Go Home' strategy is very simple. There is no route planning:
 1. Turn rover towards the home direction
@@ -368,7 +375,7 @@ In 'turntohome' mode, decisions were made base on these situations:
 1. **rover still moving** : brake and wait
 2. **rover stationary** : turn rover toward home location, calculate X seconds for rover to roam freely, change mode to 'forward'
 
-##### Simulator Runs
+## Simulator Runs
 
 The simulator was run using these parameters:
 1. Roversim_x86_64.exe (25 May 2017) on Windows 7
@@ -390,7 +397,7 @@ Video URL: https://youtu.be/MiPmyRX1FZU
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=MiPmyRX1FZU" target="_blank"><img src="http://img.youtube.com/vi/MiPmyRX1FZU/0.jpg"
 alt="Rover Simulation" width="240" height="180" border="1" /></a>
 
-###### Parameters consideration
+### Parameters consideration
 
 The current parameters are designed to enhance the chance of completing a full  run of picking all 6 rocks and map close to 100%. The trade off is that the
 rover will hit the walls a lot and get stuck a lot. In some runs, the rover will get stuck so deeply that you'll need to end the simulation.
